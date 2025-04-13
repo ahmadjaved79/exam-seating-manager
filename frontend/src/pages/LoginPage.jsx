@@ -26,7 +26,7 @@ const LoginPage = () => {
         {/* Left Side - Image */}
         <div className="w-1/2 bg-white flex items-center justify-center p-8">
           <img
-            src="src/assets/admin-login.png"
+            src="https://res.cloudinary.com/dcmt06mac/image/upload/v1744523819/logo_zrh6oy.jpg"
             alt="Login"
             className="w-[85%] max-w-md"
           />

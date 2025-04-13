@@ -10,7 +10,7 @@ function Navbar() {
           <div className="navbar-brand">
             <img
               className="navbar-logo"
-              src="src/assets/logo.jpg"
+              src="https://res.cloudinary.com/dcmt06mac/image/upload/v1744523819/logo_zrh6oy.jpg"
               alt="College Logo"
             />
             <span className="navbar-title">
