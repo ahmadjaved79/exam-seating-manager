@@ -108,6 +108,10 @@ function SeatAllocator() {
   };
 
   const arrangeSeating = () => {
+    if (students.length > rows * cols) {
+      alert(`❌ Not enough seats! You have ${students.length} students but only ${rows * cols} seats.`);
+      return;
+    }
     const newGrid = Array.from({ length: rows }, () => Array(cols).fill(null));
   
     const shuffleArray = (arr) => {

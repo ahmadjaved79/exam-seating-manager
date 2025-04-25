@@ -12,7 +12,7 @@ const LoginPage = () => {
       setError('⚠️ Username and Password required');
       return;
     }
-    if (username === 'alietseating' && password === 'admin') {
+    if (username.trim() === 'alietseating' && password.trim() === 'admin') {
       navigate('/admin');
     } else {
       setError('❌ Invalid credentials');
