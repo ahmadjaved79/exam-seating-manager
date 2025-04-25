@@ -5,7 +5,7 @@ import html2canvas from "html2canvas";
 import './seat-allocator.css';
 import Navbar from './components/Navbar';
 
-function SeatAllocatorCpy() {
+function SeatAllocator() {
   const [rows, setRows] = useState(10);
   const [cols, setCols] = useState(10);
   const [grid, setGrid] = useState([]);
@@ -100,76 +100,98 @@ function SeatAllocatorCpy() {
     });
 
     setStudents(parsed);
-  };
-
-  const directions = [
-    [-1, -1], [-1, 0], [-1, 1],
-    [0, -1],         [0, 1],
-    [1, -1], [1, 0], [1, 1]
-  ];
-
-  const isSafe = (grid, row, col, branch) => {
-    for (const [dx, dy] of directions) {
-      const r = row + dx;
-      const c = col + dy;
-      if (r >= 0 && r < rows && c >= 0 && c < cols) {
-        const student = grid[r][c];
-        if (student && student.branch === branch) {
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-
-  const getEmptyCells = (grid) => {
-    const empty = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (!grid[r][c]) empty.push([r, c]);
-      }
-    }
-    return empty;
+    alert("data inserted successfully!")
   };
 
   const arrangeSeating = () => {
     const newGrid = Array.from({ length: rows }, () => Array(cols).fill(null));
-    const totalSeats = rows * cols;
-    const studentList = [...students];
-
-    const branchCount = {};
-    for (let s of studentList) {
-      branchCount[s.branch] = (branchCount[s.branch] || 0) + 1;
-    }
-
-    studentList.sort((a, b) => branchCount[b.branch] - branchCount[a.branch]);
-
-    const backtrack = (index, placed) => {
-      if (index === studentList.length || placed === totalSeats) return index;
-      const student = studentList[index];
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (!newGrid[r][c] && isSafe(newGrid, r, c, student.branch)) {
+  
+    const shuffleArray = (arr) => {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+  
+    const canPlace = (grid, row, col, branch) => {
+      for (let i = 0; i < rows; i++) {
+        if (grid[i][col] && grid[i][col].branch === branch) return false;
+      }
+      for (let j = 0; j < cols; j++) {
+        if (grid[row][j] && grid[row][j].branch === branch) return false;
+      }
+      return true;
+    };
+  
+    const scorePosition = (grid, row, col, branch) => {
+      let score = 0;
+  
+      for (let i = 0; i < rows; i++) {
+        if (grid[i][col] && grid[i][col].branch === branch) score += 10;
+      }
+  
+      const directions = [
+        [-1, 0], [1, 0],
+        [0, -1], [0, 1]
+      ];
+  
+      for (let [dr, dc] of directions) {
+        const newRow = row + dr;
+        const newCol = col + dc;
+        if (
+          newRow >= 0 && newRow < rows &&
+          newCol >= 0 && newCol < cols &&
+          grid[newRow][newCol] &&
+          grid[newRow][newCol].branch === branch
+        ) {
+          score += 5;
+        }
+      }
+  
+      return score;
+    };
+  
+    const smartPlaceRemaining = (grid, unplacedStudents) => {
+      for (let student of unplacedStudents) {
+        let bestRow = -1, bestCol = -1, minScore = Infinity;
+  
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            if (!grid[r][c]) {
+              const score = scorePosition(grid, r, c, student.branch);
+              if (score < minScore) {
+                minScore = score;
+                bestRow = r;
+                bestCol = c;
+              }
+            }
+          }
+        }
+  
+        if (bestRow !== -1 && bestCol !== -1) {
+          grid[bestRow][bestCol] = student;
+        }
+      }
+    };
+  
+    const shuffledStudents = shuffleArray([...students]);
+    const unplacedStudents = [];
+  
+    for (let student of shuffledStudents) {
+      let placed = false;
+      for (let r = 0; r < rows && !placed; r++) {
+        for (let c = 0; c < cols && !placed; c++) {
+          if (!newGrid[r][c] && canPlace(newGrid, r, c, student.branch)) {
             newGrid[r][c] = student;
-            const result = backtrack(index + 1, placed + 1);
-            if (result === studentList.length) return result;
-            if (result > placed) return result;
-            newGrid[r][c] = null;
+            placed = true;
           }
         }
       }
-      return index;
-    };
-
-    const constraintCount = backtrack(0, 0);
-    const unplacedStudents = studentList.slice(constraintCount);
-    const remainingSeats = getEmptyCells(newGrid);
-
-    for (let i = 0; i < unplacedStudents.length && i < remainingSeats.length; i++) {
-      const [r, c] = remainingSeats[i];
-      newGrid[r][c] = unplacedStudents[i];
+      if (!placed) unplacedStudents.push(student);
     }
-
+  
+    smartPlaceRemaining(newGrid, unplacedStudents);
     setGrid(newGrid);
   };
   
@@ -314,4 +336,4 @@ function SeatAllocatorCpy() {
   );
 }
 
-export default SeatAllocatorCpy;
+export default SeatAllocator;
