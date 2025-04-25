@@ -100,6 +100,10 @@ function SeatAllocator() {
     });
 
     setStudents(parsed);
+    if (students.length > rows * cols) {
+      alert(`❌ Not enough seats! You have ${students.length} students but only ${rows * cols} seats.`);
+      return;
+    }
     alert("data inserted successfully!")
   };
 
